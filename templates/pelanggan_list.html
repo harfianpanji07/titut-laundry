@@ -1,28 +1,88 @@
 {% extends "base.html" %}
-{% block title %}Pelanggan - Putra Laundry{% endblock %}
+{% block title %}Data Pelanggan — Putra Laundry{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0">Pelanggan</h4>
-  <a class="btn btn-primary" href="{{ url_for('pelanggan_tambah') }}">+ Tambah</a>
-</div>
-<form class="mb-3" method="get">
-  <div class="input-group">
-    <input class="form-control" name="q" value="{{ q }}" placeholder="Cari nama atau nomor WhatsApp">
-    <button class="btn btn-outline-secondary">Cari</button>
+<!-- Header Halaman -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+  <div>
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 text-[11px] font-bold uppercase tracking-wider mb-1.5">
+      <span>👥</span> Master Data Pelanggan
+    </div>
+    <h2 class="text-2xl font-bold text-slate-800">Daftar & Manajemen Pelanggan</h2>
+    <p class="text-xs text-slate-500 mt-0.5">Kelola data pelanggan, status membership, nomor WhatsApp, dan alamat.</p>
   </div>
-</form>
-<div class="card shadow-sm"><div class="table-responsive">
-  <table class="table table-hover mb-0">
-    <thead><tr><th>Nama</th><th>WhatsApp</th><th>Alamat</th><th>Member</th><th></th></tr></thead>
-    <tbody>
-    {% for p in rows %}
-      <tr><td>{{ p.nama }}</td><td>{{ p.no_whatsapp }}</td><td>{{ p.alamat or '-' }}</td>
-          <td>{% if p.is_member %}<span class="badge text-bg-success">Member</span>{% endif %}</td>
-          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('pelanggan_ubah', pid=p.id) }}">Ubah</a></td></tr>
-    {% else %}
-      <tr><td colspan="5" class="text-center text-muted py-3">Data tidak ditemukan.</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div></div>
+  <a href="{{ url_for('pelanggan_tambah') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+    <span class="text-base leading-none">+</span> Tambah Pelanggan
+  </a>
+</div>
+
+<!-- Tabel Data Pelanggan -->
+<div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+  <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h3 class="text-sm font-bold text-slate-800">Database Pelanggan Outlet ({{ rows|length }} Data)</h3>
+      <p class="text-xs text-slate-400">Cari pelanggan berdasarkan nama atau nomor WhatsApp.</p>
+    </div>
+
+    <!-- Form Pencarian Server-Side (sesuai parameter ?q= di app.py) -->
+    <form method="GET" action="{{ url_for('pelanggan_list') }}" class="flex items-center gap-2 w-full sm:w-auto">
+      <input 
+        type="text" 
+        name="q"
+        value="{{ q or '' }}"
+        placeholder="🔍 Cari nama / no. WA..." 
+        class="w-full sm:w-60 pl-3.5 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 transition"
+      />
+      <button type="submit" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl transition">
+        Cari
+      </button>
+      {% if q %}
+      <a href="{{ url_for('pelanggan_list') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-xl transition">
+        Reset
+      </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <th class="py-3.5 px-5">ID</th>
+          <th class="py-3.5 px-4">Nama Pelanggan</th>
+          <th class="py-3.5 px-4">No. WhatsApp</th>
+          <th class="py-3.5 px-4">Alamat</th>
+          <th class="py-3.5 px-4">Status</th>
+          <th class="py-3.5 px-5 text-right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 text-xs">
+        {% for item in rows %}
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-3.5 px-5 font-bold text-slate-700">#PLG-{{ '%03d' % item.id }}</td>
+          <td class="py-3.5 px-4 font-bold text-slate-800">{{ item.nama }}</td>
+          <td class="py-3.5 px-4 text-slate-600">{{ item.no_whatsapp }}</td>
+          <td class="py-3.5 px-4 text-slate-600 max-w-xs truncate">{{ item.alamat or '-' }}</td>
+          <td class="py-3.5 px-4">
+            {% if item.is_member %}
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/70">⭐ Member</span>
+            {% else %}
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">Reguler</span>
+            {% endif %}
+          </td>
+          <td class="py-3.5 px-5 text-right">
+            <a href="{{ url_for('pelanggan_ubah', pid=item.id) }}" class="inline-block px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 font-semibold transition">
+              Ubah
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="py-10 text-center text-slate-400">Data pelanggan tidak ditemukan.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

@@ -1,20 +1,90 @@
 {% extends "base.html" %}
-{% block title %}Layanan & Tarif - Putra Laundry{% endblock %}
+{% block title %}Layanan & Tarif — Putra Laundry{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h4 class="mb-0">Layanan &amp; Tarif</h4>
-  <a class="btn btn-primary" href="{{ url_for('layanan_tambah') }}">+ Tambah</a>
+<!-- Header Halaman -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+  <div>
+    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 text-[11px] font-bold uppercase tracking-wider mb-1.5">
+      <span>🧺</span> Master Katalog & Harga
+    </div>
+    <h2 class="text-2xl font-bold text-slate-800">Layanan & Tarif Laundry</h2>
+    <p class="text-xs text-slate-500 mt-0.5">Kelola daftar paket cucian, tarif per kilogram, dan estimasi jam pengerjaan.</p>
+  </div>
+  <a href="{{ url_for('layanan_tambah') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+    <span class="text-base leading-none">+</span> Tambah Layanan
+  </a>
 </div>
-<div class="card shadow-sm"><div class="table-responsive">
-  <table class="table table-hover mb-0">
-    <thead><tr><th>Layanan</th><th>Tarif / kg</th><th>Estimasi</th><th>Status</th><th></th></tr></thead>
-    <tbody>
-    {% for l in rows %}
-      <tr><td>{{ l.nama_layanan }}</td><td>{{ l.tarif_per_kg | rupiah }}</td><td>{{ l.estimasi_jam }} jam</td>
-          <td>{% if l.aktif %}<span class="badge text-bg-success">Aktif</span>{% else %}<span class="badge text-bg-secondary">Nonaktif</span>{% endif %}</td>
-          <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('layanan_ubah', lid=l.id) }}">Ubah</a></td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div></div>
+
+<!-- Tabel Daftar Layanan -->
+<div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+  <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h3 class="text-sm font-bold text-slate-800">Katalog Paket & Tarif ({{ rows|length }} Layanan)</h3>
+      <p class="text-xs text-slate-400">Daftar paket cucian yang terdaftar dalam sistem.</p>
+    </div>
+    <div class="w-full sm:w-64">
+      <input 
+        type="text" 
+        id="searchLayanan"
+        onkeyup="filterLayanan()"
+        placeholder="🔍 Cari nama paket layanan..." 
+        class="w-full pl-3.5 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 transition"
+      />
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse" id="layananTable">
+      <thead>
+        <tr class="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <th class="py-3.5 px-5">Kode</th>
+          <th class="py-3.5 px-4">Nama Layanan</th>
+          <th class="py-3.5 px-4">Tarif / Kg</th>
+          <th class="py-3.5 px-4">Estimasi Waktu</th>
+          <th class="py-3.5 px-4">Status</th>
+          <th class="py-3.5 px-5 text-right">Aksi</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 text-xs">
+        {% for item in rows %}
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-3.5 px-5 font-bold text-slate-700">LYN-{{ '%02d' % item.id }}</td>
+          <td class="py-3.5 px-4 font-bold text-slate-800">{{ item.nama_layanan }}</td>
+          <td class="py-3.5 px-4 font-bold text-slate-800">
+            {{ item.tarif_per_kg | rupiah }} <span class="font-normal text-slate-400">/ Kg</span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-600">⏱️ {{ item.estimasi_jam }} Jam</td>
+          <td class="py-3.5 px-4">
+            {% if item.aktif == 1 or item.aktif is not defined %}
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/70">Aktif</span>
+            {% else %}
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">Nonaktif</span>
+            {% endif %}
+          </td>
+          <td class="py-3.5 px-5 text-right">
+            <a href="{{ url_for('layanan_ubah', lid=item.id) }}" class="inline-block px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-700 font-semibold transition">
+              Ubah
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="py-10 text-center text-slate-400">Belum ada data layanan tersimpan.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filterLayanan() {
+  const input = document.getElementById("searchLayanan").value.toLowerCase();
+  const rows = document.querySelectorAll("#layananTable tbody tr");
+  rows.forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+  });
+}
+</script>
 {% endblock %}

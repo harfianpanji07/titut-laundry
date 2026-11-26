@@ -6,7 +6,7 @@
 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
   <div>
     <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 text-[11px] font-bold uppercase tracking-wider mb-1.5">
-      <span>📊</span> Executive Control Panel
+      <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping"></span> Executive Control Panel
     </div>
     <h2 class="text-2xl font-bold text-slate-800">Dashboard Monitoring • Putra Laundry</h2>
     <p class="text-xs text-slate-500 mt-0.5">Ringkasan operasional outlet, antrian pekerjaan cucian, dan pengingat jadwal selesai.</p>
@@ -26,9 +26,9 @@
 
 <!-- Kartu Ringkasan (Khusus Owner jika view v_dashboard tersedia) -->
 {% if ringkasan %}
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6" id="kpiGrid">
   {% for key, val in ringkasan.items() %}
-  <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+  <div class="gsap-card kpi-item bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-sky-200 transition-colors">
     <div class="flex items-center justify-between mb-3">
       <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">📈</div>
       <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">Live</span>
@@ -43,19 +43,28 @@
 {% endif %}
 
 <!-- Antrian Pekerjaan & Reminder Selesai -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="operationalSection">
   <!-- Tabel Antrian Pekerjaan (2 Kolom) -->
-  <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+  <div class="gsap-panel lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
         <h3 class="text-sm font-bold text-slate-800">Antrian Pekerjaan Cucian</h3>
         <p class="text-xs text-slate-400">Menampilkan maksimal 20 antrian cucian aktif saat ini.</p>
       </div>
-      <span class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold">{{ antrian|length }} Antrian</span>
+      <div class="flex items-center gap-2">
+        <input 
+          type="text" 
+          id="searchAntrian"
+          onkeyup="filterAntrian()"
+          placeholder="🔍 Filter antrian..." 
+          class="w-44 pl-3 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 transition"
+        />
+        <span class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold shrink-0">{{ antrian|length }} Antrian</span>
+      </div>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
+      <table class="w-full text-left border-collapse" id="antrianTable">
         <thead>
           <tr class="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
             {% if antrian and antrian|length > 0 %}
@@ -69,7 +78,7 @@
         </thead>
         <tbody class="divide-y divide-slate-100 text-xs">
           {% for row in antrian %}
-          <tr class="hover:bg-slate-50/80 transition">
+          <tr class="hover:bg-sky-50/40 transition">
             {% for val in row.values() %}
               <td class="py-3 px-4 text-slate-700 font-medium">{{ val if val is not none else '-' }}</td>
             {% endfor %}
@@ -85,7 +94,7 @@
   </div>
 
   <!-- Reminder Selesai (1 Kolom) -->
-  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+  <div class="gsap-panel bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
     <div class="p-5 border-b border-slate-100 flex items-center justify-between">
       <div>
         <h3 class="text-sm font-bold text-slate-800">Reminder Jadwal Selesai</h3>
@@ -96,7 +105,7 @@
 
     <div class="p-4 space-y-3 max-h-96 overflow-y-auto">
       {% for item in reminder %}
-      <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/60">
+      <div class="gsap-card p-3.5 rounded-xl bg-slate-50 hover:bg-amber-50/40 border border-slate-200/60 transition-colors">
         {% for k, v in item.items() %}
           <div class="flex justify-between text-xs py-0.5">
             <span class="text-slate-400 capitalize">{{ k.replace('_', ' ') }}:</span>
@@ -110,4 +119,44 @@
     </div>
   </div>
 </div>
+
+<script>
+  function filterAntrian() {
+    const input = document.getElementById("searchAntrian").value.toLowerCase();
+    const rows = document.querySelectorAll("#antrianTable tbody tr");
+    rows.forEach(row => {
+      row.style.display = row.innerText.toLowerCase().includes(input) ? "" : "none";
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof gsap !== "undefined") {
+      // Animasi kartu KPI muncul berurutan
+      gsap.from(".kpi-item", {
+        scale: 0.96,
+        y: 18,
+        opacity: 0,
+        duration: 0.45,
+        stagger: 0.08,
+        ease: "back.out(1.4)",
+        clearProps: "transform"
+      });
+
+      // ScrollTrigger untuk panel operasional bawah
+      gsap.from(".gsap-panel", {
+        scrollTrigger: {
+          trigger: "#operationalSection",
+          start: "top 85%",
+          once: true
+        },
+        y: 22,
+        opacity: 0,
+        duration: 0.55,
+        stagger: 0.15,
+        ease: "power2.out",
+        clearProps: "transform"
+      });
+    }
+  });
+</script>
 {% endblock %}

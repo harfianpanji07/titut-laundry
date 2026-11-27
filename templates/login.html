@@ -3,90 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — Putra Laundry POS & Management</title>
+  <title>Login — Putra Laundry</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes spinSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes waveFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(8deg); }
+    }
+    .drum-spin {
+      animation: spinSlow 6s linear infinite;
+    }
+    .clothes-float {
+      animation: waveFloat 3s ease-in-out infinite;
+    }
   </style>
 </head>
-<body class="bg-[#F8FAFC] text-slate-800 min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen bg-gradient-to-br from-sky-900 via-sky-700 to-cyan-600 flex items-center justify-center p-4 overflow-hidden relative font-sans">
 
-  <div class="w-full max-w-md bg-white rounded-2xl border border-slate-200/80 shadow-sm p-8">
-    <!-- Brand Header -->
-    <div class="mb-7">
-      <div class="flex items-center gap-3 mb-2">
-        <div class="w-10 h-10 rounded-xl bg-sky-600 flex items-center justify-center text-white font-bold text-lg shadow-xs">
-          P
+  <!-- Layer Animasi Gelembung Sabun di Belakang -->
+  <div id="bubbleContainer" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+  <!-- Dekorasi Cahaya Halus -->
+  <div class="absolute -top-24 -left-24 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-sky-300/20 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Container Utama (Ilustrasi Mesin Cuci + Form Login) -->
+  <div id="loginWrapper" class="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/40 overflow-hidden">
+
+    <!-- Sisi Kiri: Animasi Mesin Cuci & Branding Laundry -->
+    <div class="bg-gradient-to-b from-sky-50 to-cyan-100/80 p-8 flex flex-col items-center justify-center text-center relative border-b md:border-b-0 md:border-r border-sky-200/60">
+      <span class="px-3 py-1 rounded-full bg-sky-600/10 text-sky-700 text-[11px] font-bold uppercase tracking-wider mb-4">
+        Sistem Manajemen Outlet
+      </span>
+
+      <!-- Ilustrasi Animasi Mesin Cuci -->
+      <div id="washingMachine" class="relative w-44 h-52 bg-white rounded-3xl shadow-lg border-2 border-slate-200 p-3 flex flex-col justify-between mb-5">
+        <!-- Panel Atas Mesin Cuci -->
+        <div class="flex items-center justify-between px-2 pt-1">
+          <div class="flex gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+          </div>
+          <div class="w-10 h-2 rounded-full bg-slate-200"></div>
+          <div class="w-4 h-4 rounded-full border-2 border-sky-500"></div>
         </div>
-        <div>
-          <h1 class="text-lg font-bold text-sky-700 leading-tight">Putra Laundry</h1>
-          <p class="text-xs font-medium text-slate-400">POS & Management System</p>
+
+        <!-- Pintu Tabung Kaca Mesin Cuci -->
+        <div class="mx-auto my-auto w-28 h-28 rounded-full border-[6px] border-slate-300 bg-gradient-to-b from-sky-200 to-sky-400 shadow-inner relative overflow-hidden flex items-center justify-center">
+          <!-- Air & Busa Berputar -->
+          <div class="drum-spin absolute inset-0 flex items-center justify-center">
+            <div class="w-24 h-24 rounded-full border-4 border-dashed border-white/60"></div>
+            <span class="clothes-float absolute text-2xl select-none">👕</span>
+            <span class="absolute top-2 right-4 w-3 h-3 bg-white/80 rounded-full"></span>
+            <span class="absolute bottom-3 left-4 w-2.5 h-2.5 bg-white/70 rounded-full"></span>
+            <span class="absolute top-5 left-3 w-2 h-2 bg-white/90 rounded-full"></span>
+          </div>
+          <!-- Kilau Kaca Pintu -->
+          <div class="absolute top-1 left-3 w-8 h-3 bg-white/40 rounded-full -rotate-30 pointer-events-none"></div>
         </div>
+
+        <!-- Bagian Bawah Mesin -->
+        <div class="h-3 bg-slate-100 rounded-xl mx-2"></div>
       </div>
-      <p class="text-xs text-slate-500 mt-4">Silakan masuk menggunakan akun terdaftar untuk mengelola operasional dan data master outlet.</p>
+
+      <h1 class="text-xl font-extrabold text-slate-800">Putra Laundry</h1>
+      <p class="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">
+        Kelola transaksi cucian, antrian pengerjaan, dan laporan outlet dalam satu sistem terintegrasi.
+      </p>
     </div>
 
-    <!-- Pesan Error Login dari Flask -->
-    {% if error %}
-      <div class="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-        <span>⚠️</span>
-        <span>{{ error }}</span>
+    <!-- Sisi Kanan: Form Login -->
+    <div class="p-8 sm:p-10 flex flex-col justify-center">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-slate-800">Selamat Datang 👋</h2>
+        <p class="text-xs text-slate-500 mt-1">Silakan masuk menggunakan akun kasir atau owner.</p>
       </div>
-    {% endif %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-            <span>⚠️</span>
-            <span>{{ message }}</span>
+      <!-- Notifikasi Flash Message Flask -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-4 space-y-2">
+            {% for category, message in messages %}
+              <div class="p-3 rounded-xl text-xs font-medium border {{ 'bg-rose-50 text-rose-700 border-rose-200' if category == 'danger' else 'bg-sky-50 text-sky-700 border-sky-200' }}">
+                {{ message }}
+              </div>
+            {% endfor %}
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+        {% endif %}
+      {% endwith %}
 
-    <!-- Form Login (Terhubung langsung ke route /login di app.py) -->
-    <form method="POST" action="{{ url_for('login') }}" class="space-y-4">
-      <div>
-        <label for="username" class="block text-xs font-semibold text-slate-700 mb-1.5">Username</label>
-        <input 
-          type="text" 
-          id="username" 
-          name="username"
-          placeholder="Masukkan username"
-          required
-          class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
-        />
-      </div>
+      <form method="POST" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Username</label>
+          <input
+            type="text"
+            name="username"
+            required
+            autofocus
+            placeholder="Masukkan username..."
+            class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+          />
+        </div>
 
-      <div>
-        <label for="password" class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          name="password"
-          placeholder="••••••••"
-          required
-          class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
-        />
-      </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+          <input
+            type="password"
+            name="password"
+            required
+            placeholder="••••••••"
+            class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition"
+          />
+        </div>
 
-      <div class="flex items-center justify-between pt-1">
-        <span class="text-xs text-slate-400">Outlet: Cabang Utama</span>
-        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Online
-        </span>
-      </div>
-
-      <button 
-        type="submit" 
-        class="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold rounded-xl shadow-sm transition mt-2"
-      >
-        Masuk
-      </button>
-    </form>
+        <button
+          type="submit"
+          class="w-full py-2.5 px-4 bg-sky-600 hover:bg-sky-700 active:scale-[0.99] text-white text-sm font-semibold rounded-xl shadow-md shadow-sky-600/20 transition cursor-pointer mt-2"
+        >
+          Masuk ke Sistem
+        </button>
+      </form>
+    </div>
   </div>
 
+  <!-- Script GSAP: Animasi Masuk & Gelembung Sabun Melayang -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Animasi kartu login muncul halus
+      gsap.from("#loginWrapper", {
+        y: 28,
+        opacity: 0,
+        scale: 0.97,
+        duration: 0.65,
+        ease: "power3.out"
+      });
+
+      // 2. Efek getar lembut mesin cuci (seperti sedang spin)
+      gsap.to("#washingMachine", {
+        x: 1.5,
+        rotation: 0.6,
+        duration: 0.12,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+
+      // 3. Generator gelembung sabun melayang di background
+      const container = document.getElementById("bubbleContainer");
+      const bubbleCount = 18;
+
+      for (let i = 0; i < bubbleCount; i++) {
+        const bubble = document.createElement("div");
+        const size = gsap.utils.random(16, 64);
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${gsap.utils.random(0, 100)}%`;
+        bubble.style.bottom = `-${size + 20}px`;
+        bubble.className = "absolute rounded-full bg-white/15 border border-white/30 backdrop-blur-[1px]";
+        container.appendChild(bubble);
+
+        gsap.to(bubble, {
+          y: -(window.innerHeight + 150),
+          x: `+=${gsap.utils.random(-50, 50)}`,
+          duration: gsap.utils.random(6, 13),
+          delay: gsap.utils.random(0, 6),
+          repeat: -1,
+          ease: "none"
+        });
+      }
+    });
+  </script>
 </body>
 </html>

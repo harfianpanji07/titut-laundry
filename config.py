@@ -9,4 +9,5 @@ DB_CONFIG = {
     "user": os.environ.get("DB_USER", "root"),
     "password": os.environ.get("DB_PASSWORD", ""),   # default XAMPP: kosong
     "database": os.environ.get("DB_NAME", "putra_laundry"),
+    "use_pure": True,
 }
